@@ -12,20 +12,26 @@ to another or creating extensive structure of test class hierarchy.
 
 py.test fixtures, injected in test functions as parameter names, is
 different approach for fixture management. It's neither worse nor better,
-although it's not as flexible as we need. For example, how can I create a user
-with non-default name in the test? Or create two users to see how they interact
-with each other? Or is there an easy recipe to create a user first, and then,
-say, a todo item for this particular user in another fixture?
+but we found it to be not as flexible as we need.
 
-Sure enough, we can handle all these issues with xUnit setups and teardowns or
-py.test fixtures, but we wanted something more flexible, easy and convenient to
-use. That's why we created ``resources`` library.
+Some questions, that we wanted to solve often, looked like:
+
+- I have a py.test fixture which creates a new user with default set of
+  properties. Is there a way I can create a user with different name by the same
+  fixture?
+- Is there a way to create two users in one test case with the same fixture?
+- Is there an easy recipe to create a user first, and then, say, a todo item for
+  this particular user in another, separate, fixture?
+
+Sure enough, we can handle or work around all these issues somehow with xUnit
+setups and teardowns or py.test fixtures, but we wanted something more flexible,
+easy and convenient to use. That's why we created ``resources`` library.
 
 
 How do we use it
 ----------------
 
-First, we define functions which we call "resource makers". They are
+First, we define functions which we call "resource makers". These makers are
 responsible for creating and destroying resources. It's like setup and teardown
 in one callable.
 
@@ -44,7 +50,7 @@ in one callable.
 The flow is simple: we create, we yield, we destroy.
 
 We get a number of resource makers, and we group them into modules, like
-:file:`tests/resources_core.py`, :file:`tests/resources_users.py`, etc.
+`tests/resources_core.py`, `tests/resources_users.py`, etc.
 
 Then, in a test file, where we plan to use resources, we import the same global
 object, load resource modules we need, and activate them in tests.
@@ -68,8 +74,9 @@ the code flow abandons a wrapping "with"-context.
 When it shines
 ---------------
 
-At this point and maybe not so exciting. But we also have a bunch of nifty
-features making the whole stuff more interesting.
+At this point and maybe not so exciting. Yeah, everyone can write the code like
+this,  the difference is that we actually *did it* :-). We also have a bunch
+of nifty features making the whole stuff more interesting.
 
 Feature 1. Customizeable resources
 ----------------------------------
@@ -90,7 +97,7 @@ Feature 2. Global object scope and denepdent resources
 
 We need to have access to resources at different stages of our tests: to get
 access to object's properties and methods, to initiate another, dependent
-instance, and finally to tear down.
+fixture instance, and finally to tear down everything.
 
 As soon as you enter the context with ``resources.foo_ctx()`` a variable
 ``resources.foo`` will be created and will be available from everywhere,
@@ -193,6 +200,14 @@ Here is a py.test example
 Conclusion
 ----------
 
-Five extra features to improve your test suite for free! It's already improved
-the quailty of our lives in `Doist Inc <http://doist.io>`_, and we do hope it
-will does the same for your projects.
+The `resources` library works for us in py.test environment. We don't see any
+reasons why it shouldn't work the same way with nose or classic unitttests.
+It works for python versions 2.6, 2.7 and 3.3.
+
+Please bear in mind that the library *is not thread safe*, as we are happy with
+single threaded tests at this time.
+
+And after all... Five extra features to improve your test suites for free! What
+are you waiting for? It's already improved the quailty of our lives in
+`Doist Inc <http://doist.io>`_, and we do hope it will do the same for your
+projects.
