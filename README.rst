@@ -1,5 +1,9 @@
-Resources. A fixture lifecycle management library for your tests
-=================================================================
+Resources. A fixture lifecycle management for your tests
+========================================================
+
+.. image:: https://secure.travis-ci.org/Doist/resources.png?branch=master
+   :alt: Build Status
+   :target: https://secure.travis-ci.org/Doist/resources
 
 Why do we need this library
 --------------------------------------------------
