@@ -200,6 +200,33 @@ Here is a py.test example
     def teardown_function(func):
         resources.user_mgr.stop()
 
+Feature 6. Globally accessible storage of constants
+---------------------------------------------------
+
+This feature is not something unique to `resources` module. Pretty much every
+object can act this way, but it is handy to have a convention about the
+way you store your test-related constants.
+
+It may work like this.
+
+.. code-block::
+
+    resources.TEST_DIRECTORY = '/tmp/foo'
+    resources.DOMAIN_NAME = 'example.com'
+    resources.SECRET_KEY = 'foobar'
+
+And then, in the test file.
+
+.. code-block::
+
+    from resources import resources
+    resoures.register_mod('<a resource module name here>')
+
+    def test_constants():
+        assert resources.TEST_DIRECTORY == '/tmp/foo'
+        assert resources.DOMAIN_NAME == 'example.com'
+        assert resources.SECRET_KEY == 'foobar'
+
 
 Conclusion
 ----------
@@ -211,7 +238,7 @@ It works for python versions 2.6, 2.7 and 3.3.
 Please bear in mind that the library *is not thread safe*, as we are happy with
 single threaded tests at this time.
 
-And after all... Five extra features to improve your test suites for free! What
+And after all... Six extra features to improve your test suites for free! What
 are you waiting for? It's already improved the quailty of our lives in
 `Doist Inc <http://doist.io>`_, and we do hope it will do the same for your
 projects.
