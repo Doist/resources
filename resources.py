@@ -8,11 +8,30 @@ class ResourceCollectionManager(object):
     def __init__(self):
         self._modules = set()
         # resource functions (functions making objects)
+        # key is the resource name (i.e. "user"), value is the dict, containing
+        # currently only one key: func: callable object
         self._resource_makers = {}
         # resource registry (attributes, available in current context)
+        # key is the resource name (i.e. "user"), value is the instantiated
+        # object, if any (the object will be instantiated if we are within the
+        # "with"-context, for example.
         self._resource_registry = {}
         # resource managers (those which ensure "start" and "stop" functionality)
+        # actually, it's a dict which contains unfinished generators.
+        # key is the resource name, value is the generator instance
+        # Instances are added to this dict, when a xxx_mgr.start()/xxx_mgr.stop()
+        # methods are used.
         self._resource_managers = {}
+
+    def _active_resource_makers(self):
+        """
+        Return the subset of _resource_makers.keys() registered with "register_mod"
+        """
+        ret = set()
+        for key, value in self._resource_makers.items():
+            if value['func'].__module__ in self._modules:
+                ret.add(key)
+        return ret
 
     @property
     def __members__(self):
@@ -20,7 +39,7 @@ class ResourceCollectionManager(object):
 
     @property
     def __methods__(self):
-        keys = self._resource_makers.keys()
+        keys = self._active_resource_makers()
         ctx_keys = ['%s_ctx' % key for key in keys]
         mgr_keys = ['%s_mgr' % key for key in keys]
         return ctx_keys + mgr_keys
@@ -31,21 +50,35 @@ class ResourceCollectionManager(object):
         :param module_name: string with a module name
         """
         self._modules.add(module_name)
-        __import__(module_name)
+        mod = __import__(module_name)
+
+    def unregister_mod(self, module_name):
+        """
+        Unregister a module, make resources from the module unavailable.
+        :param module_name: string with a module name
+        """
+        self._modules.remove(module_name)
 
     def register_func(self, func):
         """
         Decorator to register function as a resource
         """
+        # py2.x & py3.x support
         resource_id = getattr(func, 'func_name', func.__name__)
         self._resource_makers[resource_id] = {'func': func}
         return func
 
     def __getattr__(self, item):
         if item.endswith('_ctx'):
-            return self._get_decorator_and_context_manager(item[:-4])
+            try:
+                return self._get_decorator_and_context_manager(item[:-4])
+            except RuntimeError as e:
+                raise AttributeError(str(e))
         elif item.endswith('_mgr'):
-            return self._get_manager(item[:-4])
+            try:
+                return self._get_manager(item[:-4])
+            except RuntimeError as e:
+                raise AttributeError(str(e))
         else:
             try:
                 return self._resource_registry[item]
@@ -60,7 +93,7 @@ class ResourceCollectionManager(object):
 
     def _get_decorator_and_context_manager(self, resource_id):
 
-        if resource_id not in self._resource_makers.keys():
+        if resource_id not in self._active_resource_makers():
             raise RuntimeError("Don't know how to create resource %s" % resource_id)
         resource_maker = self._resource_makers[resource_id]['func']
 
@@ -122,7 +155,7 @@ class ResourceCollectionManager(object):
         if resource_id in self._resource_managers:
             return self._resource_managers[resource_id]
 
-        if resource_id not in self._resource_makers.keys():
+        if resource_id not in self._active_resource_makers():
             raise RuntimeError("Don't know how to create resource %s" % resource_id)
         resource_maker = self._resource_makers[resource_id]['func']
         resource_manager = ResourceManager(self, resource_id, resource_maker)
