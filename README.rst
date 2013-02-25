@@ -96,7 +96,7 @@ resource maker function as an arguments.
             assert user.username == 'Mary'
 
 
-Feature 2. Global object scope and denepdent resources
+Feature 2. Global object scope and dependent resources
 ------------------------------------------------------
 
 We need to have access to resources at different stages of our tests: to get

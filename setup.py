@@ -9,7 +9,7 @@ def read(fname):
         return ''
 
 setup(
-    name='resources',
+    name='python-resources',
     version='0.2',
     py_modules=['resources'],
     author='Roman Imankulov',
