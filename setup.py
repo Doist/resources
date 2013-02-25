@@ -15,6 +15,7 @@ setup(
     author='Roman Imankulov',
     author_email='roman.imankulov@gmail.com',
     license='BSD',
+    url='https://github.com/doist/resources',
     description=' A fixture lifecycle management library for your tests',
     long_description = read('README.rst'),
     # see here for complete list of classifiers
