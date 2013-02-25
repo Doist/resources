@@ -142,8 +142,7 @@ namespace to get access to them. Otherwise you must create a unique identifier
 for every resource.
 
 Actually, it's trivial. All you should do is provide a special `_name` attribute
-to context manager constructor. This
- attribute won't be passed to your resource
+to context manager constructor. This attribute won't be passed to your resource
 maker function.
 
 .. code-block:: python
@@ -181,9 +180,9 @@ suite uses the same set of resources, it would be counterproductive to write
 the same chain of decorators or context managers over and over again.
 
 In this case we use another concept: resource managers. Every resource maker
-``foo`` creates the ``resources.foo_mgr`` instance, having :func:`start` and
-:func:`stop` methods. The `start` method accepts all arguments which
-the :func:`foo_ctx` function does, including special `_name` argument.
+``foo`` creates the ``resources.foo_mgr`` instance, having `start` and
+`stop` methods. The `start` method accepts all arguments which
+the `foo_ctx` function does, including special `_name` argument.
 The `stop` method has only one optional `_name` argument, and is used to
 destroy previously created instance.
 
