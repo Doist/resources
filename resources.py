@@ -2,15 +2,28 @@
 import inspect
 from functools import wraps
 
+# resource functions (functions making objects)
+# key is the resource name (i.e. "user"), value is the dict, containing
+# currently only one key: func: callable object
+
+# It's a global object, because it should be shared between all resource
+# instances
+_resource_makers = {}
+
+
+def register_func(func):
+    """
+    Decorator to register function as a resource
+    """
+    resource_id = func.__name__
+    _resource_makers[resource_id] = {'func': func}
+    return func
+
 
 class ResourceCollectionManager(object):
 
     def __init__(self):
         self._modules = set()
-        # resource functions (functions making objects)
-        # key is the resource name (i.e. "user"), value is the dict, containing
-        # currently only one key: func: callable object
-        self._resource_makers = {}
         # resource registry (attributes, available in current context)
         # key is the resource name (i.e. "user"), value is the instantiated
         # object, if any (the object will be instantiated if we are within the
@@ -28,7 +41,7 @@ class ResourceCollectionManager(object):
         Return the subset of _resource_makers.keys() registered with "register_mod"
         """
         ret = set()
-        for key, value in self._resource_makers.items():
+        for key, value in _resource_makers.items():
             if value['func'].__module__ in self._modules:
                 ret.add(key)
         return ret
@@ -63,9 +76,10 @@ class ResourceCollectionManager(object):
         """
         Decorator to register function as a resource
         """
-        # py2.x & py3.x support
-        resource_id = getattr(func, 'func_name', func.__name__)
-        self._resource_makers[resource_id] = {'func': func}
+        # todo: copy-paste of the global function
+        # kept within object for convenience and backward compatibility
+        resource_id = func.__name__
+        _resource_makers[resource_id] = {'func': func}
         return func
 
     def __getattr__(self, item):
@@ -95,7 +109,7 @@ class ResourceCollectionManager(object):
 
         if resource_id not in self._active_resource_makers():
             raise RuntimeError("Don't know how to create resource %s" % resource_id)
-        resource_maker = self._resource_makers[resource_id]['func']
+        resource_maker = _resource_makers[resource_id]['func']
 
         class DecoratorAndContextManager(object):
 
@@ -157,7 +171,7 @@ class ResourceCollectionManager(object):
 
         if resource_id not in self._active_resource_makers():
             raise RuntimeError("Don't know how to create resource %s" % resource_id)
-        resource_maker = self._resource_makers[resource_id]['func']
+        resource_maker = _resource_makers[resource_id]['func']
         resource_manager = ResourceManager(self, resource_id, resource_maker)
         self._resource_managers[resource_id] = resource_manager
 
