@@ -177,6 +177,29 @@ class ResourceCollectionManager(object):
 
         return resource_manager
 
+    # some helper functions
+
+    def pdb(self):
+        try:
+            import ipdb
+        except ImportError:
+            import pdb as ipdb
+        ipdb.set_trace()
+
+    def shell(self, namespace=None):
+        try:
+            from IPython import embed
+        except ImportError:
+            import code
+            import readline
+            import rlcompleter
+            # we must pass at least something in here
+            if namespace is None:
+                namespace = {'resources': resources}
+            code.InteractiveConsole(namespace).interact()
+        else:
+            embed()
+
 
 class ResourceManager(object):
 

@@ -199,7 +199,73 @@ Here is a py.test example
     def teardown_function(func):
         resources.user_mgr.stop()
 
-Feature 6. Globally accessible storage of constants
+
+Feature 6. Built-in console and debugger
+----------------------------------------
+
+Sometimes it's nice to take a look on what's going on within test function and
+get access at some point to python console or debugger.
+
+Usually you probably do something like
+
+.. code-block:: python
+
+    import pdb; pdb.set_trace()
+
+Or, if you need to get shell and have IPython installed
+
+.. code-block:: python
+
+    from IPython import embed; embed()
+
+As it happens often, we added to resources two functions, launching either
+debugger or python console inside your test function.
+
+.. code-block:: python
+
+    from resources import resources
+
+    def test_something():
+        resources.pdb()    # to launch debugger
+        resources.shell()  # to launch Python REPL
+
+If you install IPython and ipdb (`pip install IPython ipdb`), you get more
+friendly versions of consoles, otherwise resources fall back to built-in python
+console and debugger.
+
+Launch `py.test` with `-s` switch to be able to fall into interactive console.
+
+It's especially cool that resources object is autocomplete-friendly and it
+works well in IPython
+
+.. code-block:: python
+
+
+    In [1]: resources.
+    resources.john            resources.pdb             resources.register_mod
+    resources.mary            resources.register_func   resources.shell
+
+    In [1]: resources.mary
+    Out[1]: {'name': 'Mary Moe'}
+
+    In [2]: resources.user_mgr.start()
+    Out[2]: {'name': 'John Doe'}
+
+    In [3]: resources.todo
+    resources.todo_item_ctx  resources.todo_item_mgr
+
+    In [3]: resources.todo_item_mgr.start()
+    Out[3]: {'text': 'Do something', 'user': {'name': 'John Doe'}}
+
+    In [4]: resources.todo
+    resources.todo_item      resources.todo_item_ctx  resources.todo_item_mgr
+
+    In [4]: resources.todo_item
+    Out[4]: {'text': 'Do something', 'user': {'name': 'John Doe'}}
+
+
+
+Feature 7. Globally accessible storage of constants
 ---------------------------------------------------
 
 This feature is not something unique to `resources` module. Pretty much every
@@ -237,7 +303,7 @@ It works for python versions 2.6, 2.7 and 3.3.
 Please bear in mind that the library *is not thread safe*, as we are happy with
 single threaded tests at this time.
 
-And after all... Six extra features to improve your test suites for free! What
+And after all... Seven extra features to improve your test suites for free! What
 are you waiting for? It's already improved the quailty of our lives in
 `Doist Inc <http://doist.io>`_, and we do hope it will do the same for your
 projects.

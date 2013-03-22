@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name='python-resources',
-    version='0.2',
+    version='0.3',
     py_modules=['resources'],
     author='Roman Imankulov',
     author_email='roman.imankulov@gmail.com',
